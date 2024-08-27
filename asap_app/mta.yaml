@@ -1,0 +1,80 @@
+_schema-version: "3.2"
+ID: asap_app
+version: 0.0.1
+modules:
+- name: asap_app-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: asap_app-destination-service
+    parameters:
+      content-target: true
+  - name: asap_app_html_repo_host
+    parameters:
+      service-key:
+        name: asap_app_html_repo_host-key
+  - name: uaa_asap_app
+    parameters:
+      service-key:
+        name: uaa_asap_app-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: asap_app_asap_app_html_repo_host
+          ServiceInstanceName: asap_app-html5-app-host-service
+          ServiceKeyName: asap_app_html_repo_host-key
+          sap.cloud.service: asap_app
+        - Authentication: OAuth2UserTokenExchange
+          Name: asap_app_uaa_asap_app
+          ServiceInstanceName: asap_app-xsuaa-service
+          ServiceKeyName: uaa_asap_app-key
+          sap.cloud.service: asap_app
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: asap_app_ui_deployer
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: asap_app_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - asap_app-content.zip
+      name: asap_app
+      target-path: resources/
+- name: asap_app
+  type: html5
+  path: asap_app
+  build-parameters:
+    builder: custom
+    commands:
+    - npm install
+    - npm run build
+    supported-platforms: []
+resources:
+- name: asap_app-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      version: 1.0.0
+    service: destination
+    service-name: asap_app-destination-service
+    service-plan: lite
+- name: asap_app_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: asap_app-html5-app-host-service
+    service-plan: app-host
+- name: uaa_asap_app
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: asap_app-xsuaa-service
+    service-plan: application

@@ -1,0 +1,11 @@
+{
+  "sap.app": {
+    "id": "asap_app",
+    "applicationVersion": {
+      "version": "1.0.0"
+    }
+  },
+  "sap.cloud": {
+    "service": "asap_app"
+  }
+}
